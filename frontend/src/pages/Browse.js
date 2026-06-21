@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CompanyLogo, CATEGORY_COLORS, getBookmarks, saveBookmarks } from "../components/shared";
+import { CompanyLogo, CATEGORY_COLORS, getBookmarks, saveBookmarks, getApplications, saveApplications } from "../components/shared";
 
 const API = "https://interntrack123.vercel.app";
 const CATEGORIES = ["All", "Software Engineering", "AI/ML", "Data Science", "Data Analytics", "Data Engineering", "Other"];
@@ -14,6 +14,7 @@ export default function Browse() {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [bookmarks, setBookmarksState] = useState(getBookmarks);
+  const [promptJob, setPromptJob] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -40,6 +41,33 @@ export default function Browse() {
   };
 
   const isBookmarked = (job) => !!bookmarks[`${job.company}||${job.role}`];
+
+  const isTracked = (job) => {
+    const apps = getApplications();
+    return apps.some(a => a.company === job.company && a.role === job.role);
+  };
+
+  const handleApply = (job) => {
+    window.open(job.apply_url, "_blank", "noreferrer");
+    if (!isTracked(job)) setPromptJob(job);
+  };
+
+  const logApplication = (job) => {
+    const apps = getApplications();
+    saveApplications([...apps, {
+      id: Date.now(),
+      company: job.company,
+      role: job.role,
+      location: job.location || "",
+      source: "Company Site",
+      dateApplied: new Date().toISOString().split("T")[0],
+      status: "Applied",
+      jobUrl: job.apply_url || "",
+      category: job.category || "Other",
+      notes: "",
+    }]);
+    setPromptJob(null);
+  };
 
   const filtered = jobs.filter(j =>
     j.company.toLowerCase().includes(search.toLowerCase()) ||
@@ -178,15 +206,47 @@ export default function Browse() {
                   }}
                 >{bookmarked ? "★" : "☆"}</button>
                 {job.apply_url && (
-                  <a href={job.apply_url} target="_blank" rel="noreferrer"
-                    style={{ background: "#7c3aed", color: "white", padding: "8px 18px", borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}
-                  >Apply</a>
+                  <button
+                    onClick={() => handleApply(job)}
+                    style={{ background: "#7c3aed", color: "white", padding: "8px 18px", borderRadius: 8, fontSize: 13, fontWeight: 600, border: "none", cursor: "pointer", whiteSpace: "nowrap" }}
+                  >Apply</button>
                 )}
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* Log application modal */}
+      {promptJob && (
+        <div
+          onClick={() => setPromptJob(null)}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}
+        >
+          <div onClick={e => e.stopPropagation()} style={{ background: "white", borderRadius: 16, padding: 28, maxWidth: 380, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+              <CompanyLogo company={promptJob.company} size={40} />
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: "#111827" }}>{promptJob.company}</div>
+                <div style={{ color: "#6b7280", fontSize: 13 }}>{promptJob.role}</div>
+              </div>
+            </div>
+            <p style={{ color: "#374151", fontSize: 14, margin: "0 0 20px" }}>
+              Want to log this as an application so you can track its status?
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => logApplication(promptJob)}
+                style={{ flex: 1, padding: "10px", background: "#7c3aed", color: "white", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: 14 }}
+              >Yes, log it</button>
+              <button
+                onClick={() => setPromptJob(null)}
+                style={{ flex: 1, padding: "10px", background: "#f3f4f6", color: "#374151", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: 14 }}
+              >Skip</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
