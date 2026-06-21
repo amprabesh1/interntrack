@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS job_postings (
     location      TEXT,
     apply_url     TEXT,
     source_repo   TEXT,
+    category      TEXT,
     posted_at     TIMESTAMP DEFAULT NOW()
 );
 
