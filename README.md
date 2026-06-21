@@ -5,6 +5,8 @@ Live internship and new-grad job listings scraped daily from GitHub, stored in P
 **Frontend:** https://interntrackpa.vercel.app  
 **API:** https://interntrack123.vercel.app
 
+![InternTrack](https://github.com/user-attachments/assets/3ed85477-8750-4cdc-a769-5c80c24c1e70)
+
 ---
 
 ## What It Does
