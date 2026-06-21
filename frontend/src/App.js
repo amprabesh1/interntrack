@@ -12,10 +12,10 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`https://interntrackpa.vercel.app/jobs?category=${category}`)
+    fetch(`https://interntrack123.vercel.app/jobs?category=${category}`)
       .then(res => res.json())
       .then(data => { setJobs(data); setLoading(false); });
-    fetch("https://interntrackpa.vercel.app/stats")
+    fetch("https://interntrack123.vercel.app/stats")
       .then(res => res.json())
       .then(data => setStats(data));
   }, [category]);
@@ -27,7 +27,7 @@ export default function App() {
   );
 
   const handleSubscribe = () => {
-    fetch(`https://interntrackpa.vercel.app/subscribe?email=${email}`, { method: "POST" })
+    fetch(`https://interntrack123.vercel.app/subscribe?email=${email}`, { method: "POST" })
       .then(res => res.json())
       .then(data => { setMessage(data.message); setEmail(""); });
   };
